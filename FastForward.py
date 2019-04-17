@@ -14,7 +14,7 @@ from scipy.io import wavfile
 import numpy as np
 # intro to deep rl https://www.youtube.com/watch?v=zR11FLZ-O9M
 
-
+import time 
 parser = argparse.ArgumentParser(description='Modifies a video file to play at different speeds when there is sound vs. silence.')
 parser.add_argument('--input_file', type=str,  help='the video file you want modified')
 parser.add_argument('--url', type=str, help='A youtube url to download and process')
@@ -70,17 +70,7 @@ def deletePath(s): # Dangerous! Watch out!
         print ("Deletion of the directory %s failed" % s)
         print(OSError)
 
-if __name__ == "__main__":
-    while True:
-        time.sleep(15)
-        with open('config.txt', "r") as f:
-            url = f.readline()
-            if 'http' in url:
-                run(url)
-                with open('config.txt', "w") as f:
-                    for line in lines:
-                        if line.strip("\n") != url:
-                            f.write(line)
+
 
 def run(url):
     frameRate = args.frame_rate
@@ -88,32 +78,29 @@ def run(url):
     SILENT_THRESHOLD = args.silent_threshold
     FRAME_SPREADAGE = args.frame_margin
     NEW_SPEED = [args.silent_speed, args.sounded_speed]
+    INPUT_FILE = downloadFile(url)
     
-    # if args.url != None:
-    #     INPUT_FILE = downloadFile(args.url)
-    # else:
-    #     INPUT_FILE = args.input_file
-    # URL = args.url
-    # 
-    URL=url
+   
     FRAME_QUALITY = args.frame_quality
 
-    assert INPUT_FILE != None , "why u put no input file, that dum"
+    
         
     if len(args.output_file) >= 1:
         OUTPUT_FILE = args.output_file
     else:
         OUTPUT_FILE = inputToOutputFilename(INPUT_FILE)
+    
+    OUTPUT_FILE = f"'./data/{OUTPUT_FILE}'"
 
     TEMP_FOLDER = "./TEMP"
     AUDIO_FADE_ENVELOPE_SIZE = 400 # smooth out transitiion's audio by quickly fading in/out (arbitrary magic number whatever)
     createPath(TEMP_FOLDER)
 
-
-    command = "ffmpeg -i "+INPUT_FILE+" -qscale:v "+str(FRAME_QUALITY)+" "+TEMP_FOLDER+"/frame%06d.jpg -hide_banner"
+    print(INPUT_FILE)
+    command = "ffmpeg -i '"+INPUT_FILE+"' -qscale:v "+str(FRAME_QUALITY)+" "+TEMP_FOLDER+"/frame%06d.jpg -hide_banner"
     subprocess.call(command, shell=True)
 
-    command = "ffmpeg -i "+INPUT_FILE+" -ab 160k -ac 2 -ar "+str(SAMPLE_RATE)+" -vn "+TEMP_FOLDER+"/audio.wav"
+    command = "ffmpeg -i '"+INPUT_FILE+"' -ab 160k -ac 2 -ar "+str(SAMPLE_RATE)+" -vn "+TEMP_FOLDER+"/audio.wav"
 
     subprocess.call(command, shell=True)
 
@@ -216,3 +203,20 @@ def run(url):
     subprocess.call(command, shell=True)
 
     deletePath(TEMP_FOLDER)
+
+
+if __name__ == "__main__":
+    if not os.path.isfile('./data/config.txt'):
+        with open('./data/config.txt', w):
+            pass
+    while True:
+        
+        with open('data/config.txt', "r") as f:
+            url = f.readline()
+            if 'http' in url:
+                run(url)
+                with open('data/config.txt', "w") as f:
+                    for line in lines:
+                        if line.strip("\n") != url:
+                            f.write(line)
+        time.sleep(15)

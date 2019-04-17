@@ -13,7 +13,7 @@ from audiotsm.io.wav import WavReader, WavWriter
 from scipy.io import wavfile
 import numpy as np
 # intro to deep rl https://www.youtube.com/watch?v=zR11FLZ-O9M
-
+TEMP_FOLDER = "./TEMP"
 import time 
 parser = argparse.ArgumentParser(description='Modifies a video file to play at different speeds when there is sound vs. silence.')
 parser.add_argument('--input_file', type=str,  help='the video file you want modified')
@@ -92,7 +92,7 @@ def run(url):
     
     OUTPUT_FILE = f"'./data/{OUTPUT_FILE}'"
 
-    TEMP_FOLDER = "./TEMP"
+    
     AUDIO_FADE_ENVELOPE_SIZE = 400 # smooth out transitiion's audio by quickly fading in/out (arbitrary magic number whatever)
     createPath(TEMP_FOLDER)
 
